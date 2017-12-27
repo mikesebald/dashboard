@@ -70,15 +70,28 @@ server <- function(input, output) {
     # input$updateAction
     # paste(input$updateAction)
     
-    # querystring <- '{ "merged.type": "person" }'
-    
+    recordTypes <- paste0(input$recordType)
+    queryString <- c()
     # build query string for record types
-    
-    
+    if (!is.na(match("goldens", recordTypes)))
+      queryString <- c(queryString, '"_id.s": "system"')
+    if (!is.na(match("valids", recordTypes)))
+      queryString <- c(queryString, '"api": "merged", "_id.s": {"$ne": "system"}')
+    if (!is.na(match("invalids", recordTypes)))
+      queryString <- c(queryString, '"api": "validated"')
+
     # build query string for date
-    if ()
-    querystring <- '{}'
-    recordCount <- mdb$count(query = querystring)
+    
+    # execute query
+    if (is.null(queryString)) {
+      recordCount <- 0
+      cat("Record Count:", recordCount)
+    }
+    else {
+      queryString <- paste0('{"$or": [{', paste0(queryString, collapse = '}, {'), '}]}')
+      cat("\nQuery String:", queryString, "\n")
+      recordCount <- mdb$count(query = queryString)
+    }
     as.character(recordCount)
   })
 }
