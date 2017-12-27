@@ -8,6 +8,11 @@
 #
 
 library(shiny)
+library(mongolite)
+
+mdbname <- "cdh"
+colname <- "record_history"
+mdb <- mongo(collection = colname, db = mdbname)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -41,7 +46,8 @@ ui <- fluidPage(
         textOutput("fromDate"),
         textOutput("toDate"),
         textOutput("recordType"),
-        textOutput("buttonPushed")
+        textOutput("buttonPushed"),
+        textOutput("recordCount")
       )
    )
 )
@@ -61,8 +67,19 @@ server <- function(input, output) {
   })
   
   output$buttonPushed <- renderText({
-    input$updateAction
-    paste(input$updateAction)
+    # input$updateAction
+    # paste(input$updateAction)
+    
+    # querystring <- '{ "merged.type": "person" }'
+    
+    # build query string for record types
+    
+    
+    # build query string for date
+    if ()
+    querystring <- '{}'
+    recordCount <- mdb$count(query = querystring)
+    as.character(recordCount)
   })
 }
 
