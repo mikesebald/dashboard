@@ -26,14 +26,9 @@ ui <- dashboardPage(
 
   dashboardBody(
     fluidRow(
-      textOutput("fromDate"),
-      textOutput("toDate"),
-      textOutput("recordType"),
-      textOutput("buttonPushed"),
-      textOutput("recordCount")
-    ),
-    fluidRow(
-      valueBoxOutput("count")
+      valueBoxOutput("goldens"),
+      valueBoxOutput("valids"),
+      valueBoxOutput("invalids")
     )
   )
 )
@@ -52,34 +47,42 @@ server <- function(input, output) {
     paste("Selected record types: ", paste0(input$recordType, collapse = ", "))
   })
   
-  output$count <- renderValueBox({
-    recordTypes <- paste0(input$recordType)
-    queryString <- c()
-    # build query string for record types
-    if (!is.na(match("goldens", recordTypes)))
-      queryString <- c(queryString, '"_id.s": "system"')
-    if (!is.na(match("valids", recordTypes)))
-      queryString <- c(queryString, '"api": "merged", "_id.s": {"$ne": "system"}')
-    if (!is.na(match("invalids", recordTypes)))
-      queryString <- c(queryString, '"api": "validated"')
-
-    # build query string for date
-    
-    # execute query
-    if (is.null(queryString)) {
+  output$goldens <- renderValueBox({
+    if (!is.na(match("goldens", input$recordType)))
+      recordCount <- mdb$count(query = '{"_id.s": "system"}')
+    else
       recordCount <- 0
-      cat("Record Count:", recordCount)
-    }
-    else {
-      queryString <- paste0('{"$or": [{', paste0(queryString, collapse = '}, {'), '}]}')
-      cat("\nQuery String:", queryString, "\n")
-      recordCount <- mdb$count(query = queryString)
-    }
-    
+
     valueBox(
       value = as.character(recordCount),
-      subtitle = "Total records",
-      icon = icon("address-card")
+      subtitle = "Golden records",
+      icon = icon("diamond")
+    )
+  })
+  
+  output$valids <- renderValueBox({
+    if (!is.na(match("valids", input$recordType)))
+      recordCount <- mdb$count(query = '{"api": "merged", "_id.s": {"$ne": "system"}}')
+    else
+      recordCount <- 0
+
+    valueBox(
+      value = as.character(recordCount),
+      subtitle = "Valid records",
+      icon = icon("thumbs-up")
+    )
+  })
+  
+  output$invalids <- renderValueBox({
+    if (!is.na(match("invalids", input$recordType)))
+      recordCount <- mdb$count(query = '{"api": "validated"}')
+    else
+      recordCount <- 0
+
+    valueBox(
+      value = as.character(recordCount),
+      subtitle = "Invalid records",
+      icon = icon("thumbs-down")
     )
   })
 }
