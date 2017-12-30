@@ -9,26 +9,42 @@ ui <- dashboardPage(
   skin = "red",
   dashboardHeader(title = "Dashboard"),
   dashboardSidebar(
-    fluidPage(
-      checkboxGroupInput("recordType",
-                         "Record type",
-                         list("Golden records" = "goldens",
-                              "Valid records" = "valids",
-                              "Invalid records" = "invalids")),
-      dateRangeInput("dateRange", 
-                       "Date range",
-                       start = "2017-01-01",
-                       end = "2017-12-31",
-                       min = "2017-01-01",
-                       max = "2017-12-31")
+    sidebarMenu(
+      menuItem("Dashboard", tabName = "dashboard"),
+      menuItem("Validation errors", tabName = "validationErrors")
     )
   ),
 
   dashboardBody(
-    fluidRow(
-      valueBoxOutput("goldens"),
-      valueBoxOutput("valids"),
-      valueBoxOutput("invalids")
+    tabItems(
+      tabItem("dashboard",
+        fluidRow(
+          box("Record selection", background = "maroon",
+            checkboxGroupInput("recordType",
+                               "Record type",
+                               list("Golden records" = "goldens",
+                                    "Valid source records" = "valids",
+                                    "Invalid source records" = "invalids"
+                                    )
+            )
+          ),
+          box("Date range selection", background = "teal",
+            dateRangeInput("dateRange", 
+                             "Date range",
+                             start = "2017-01-01",
+                             end = "2017-12-31",
+                             min = "2017-01-01",
+                             max = "2017-12-31"
+            )
+          )
+        ),
+        fluidRow(
+          valueBoxOutput("goldens"),
+          valueBoxOutput("valids"),
+          valueBoxOutput("invalids")
+        )
+      ),
+      tabItem("validationErrors")
     )
   )
 )
@@ -68,7 +84,7 @@ server <- function(input, output) {
 
     valueBox(
       value = as.character(recordCount),
-      subtitle = "Valid records",
+      subtitle = "Valid source records",
       icon = icon("thumbs-up")
     )
   })
@@ -81,7 +97,7 @@ server <- function(input, output) {
 
     valueBox(
       value = as.character(recordCount),
-      subtitle = "Invalid records",
+      subtitle = "Invalid source records",
       icon = icon("thumbs-down")
     )
   })
