@@ -1,7 +1,10 @@
 library(shinydashboard)
 library(mongolite)
 
-mdbname <- "cdh"
+# db.record_history.createIndex({"_id.s": 1})
+# db.record_history.createIndex({"api": 1})
+
+mdbname <- "bi"
 colname <- "record_history"
 mdb <- mongo(collection = colname, db = mdbname)
 mongo_revision <- mongo("revision", "cdh")
@@ -89,7 +92,7 @@ server <- function(input, output) {
   output$valids <- renderValueBox({
     if (!is.na(match("valids", input$recordType)))
       recordCount <-
-        mdb$count(query = '{"api": "merged", "_id.s": {"$ne": "system"}}')
+        mdb$count(query = '{"_id.s": {"$ne": "system"}, "api": "merged"}')
     else
       recordCount <- 0
     
